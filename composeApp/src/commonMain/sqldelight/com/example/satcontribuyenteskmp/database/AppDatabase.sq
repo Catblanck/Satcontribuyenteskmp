@@ -1,0 +1,101 @@
+CREATE TABLE IF NOT EXISTS Estado (
+    id INTEGER NOT NULL PRIMARY KEY,
+    nombre TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Municipio (
+    id INTEGER NOT NULL PRIMARY KEY,
+    nombre TEXT NOT NULL,
+    estado_id INTEGER NOT NULL,
+    FOREIGN KEY (estado_id) REFERENCES Estado(id)
+);
+
+CREATE TABLE IF NOT EXISTS Contribuyente (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    rfc TEXT NOT NULL,
+    nombre TEXT NOT NULL,
+    razon_social TEXT,
+    tipo_persona TEXT NOT NULL,
+    codigo_postal TEXT,
+    colonia TEXT,
+    calle TEXT,
+    numero_exterior TEXT,
+    numero_interior TEXT,
+    actividad_economica TEXT,
+    regimen_fiscal TEXT,
+    estado_id INTEGER NOT NULL,
+    municipio_id INTEGER NOT NULL,
+    FOREIGN KEY (estado_id) REFERENCES Estado(id),
+    FOREIGN KEY (municipio_id) REFERENCES Municipio(id)
+);
+
+insertEstado:
+INSERT INTO Estado(id, nombre)
+VALUES (?, ?);
+
+insertMunicipio:
+INSERT INTO Municipio(id, nombre, estado_id)
+VALUES (?, ?, ?);
+
+insertContribuyente:
+INSERT INTO Contribuyente(
+    rfc,
+    nombre,
+    razon_social,
+    tipo_persona,
+    codigo_postal,
+    colonia,
+    calle,
+    numero_exterior,
+    numero_interior,
+    actividad_economica,
+    regimen_fiscal,
+    estado_id,
+    municipio_id
+)
+VALUES (?, ?, ?,?,
+?,?,?, ?,
+ ?,?,?,?, ?);
+
+getEstados:
+SELECT * FROM Estado;
+
+getMunicipiosByEstado:
+SELECT * FROM Municipio
+WHERE estado_id = ?;
+
+getContribuyentes:
+SELECT * FROM Contribuyente;
+
+deleteContribuyente:
+DELETE FROM Contribuyente
+WHERE id = ?;
+
+buscarPorRfc:
+SELECT * FROM Contribuyente
+WHERE rfc LIKE '%' || ? || '%';
+
+buscarPorId:
+SELECT * FROM Contribuyente
+WHERE id = ?;
+
+
+updateContribuyente:
+UPDATE Contribuyente
+SET
+    rfc = ?,
+    nombre = ?,
+    razon_social = ?,
+    tipo_persona = ?,
+    codigo_postal = ?,
+    colonia = ?,
+    calle = ?,
+    numero_exterior = ?,
+    numero_interior = ?,
+    actividad_economica = ?,
+    regimen_fiscal = ?,
+    estado_id = ?,
+    municipio_id = ?
+WHERE id = ?;
+
+
