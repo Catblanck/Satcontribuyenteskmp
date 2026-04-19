@@ -109,10 +109,6 @@ internal class ContribuyenteDAO(
             id
         )
     }
-//    fun obtenerContribuyentesConUbicacionFlow() =
-//        queries.getContribuyentesConUbicacion()
-//            .asFlow()
-//            .mapToList(Dispatchers.IO)
 }
 
 
