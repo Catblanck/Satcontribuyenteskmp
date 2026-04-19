@@ -16,32 +16,48 @@ internal class ContribuyenteViewModel internal constructor(
     private val _municipios = MutableStateFlow<List<Municipio>>(emptyList())
     val municipios: StateFlow<List<Municipio>> = _municipios.asStateFlow()
 
-    private val _contribuyentes = MutableStateFlow<List<Contribuyente>>(emptyList())
-    val contribuyentes: StateFlow<List<Contribuyente>> = _contribuyentes.asStateFlow()
+    private val _contribuyentes = MutableStateFlow<List<GetContribuyentesConUbicacion>>(emptyList())
+
+    val contribuyentes: StateFlow<List<GetContribuyentesConUbicacion>> = _contribuyentes
 
     init {
         cargarCatalogosIniciales()
         cargarContribuyentes()
     }
+
+    fun cargarContribuyentes(rfc: String = "") {
+        viewModelScope.launch {
+            dao.obtenerContribuyentesConUbicacionFlow(rfc).collect { lista ->
+                _contribuyentes.value = lista
+            }
+        }
+    }
+
     suspend fun buscarPorIdDirecto(id: Long): Contribuyente? {
         return dao.buscarPorId(id)
     }
 
     fun cargarEstados() {
         viewModelScope.launch {
-            _estados.value = dao.obtenerEstadosFlow().first()
+            dao.obtenerEstadosFlow().collect {
+                _estados.value = it
+            }
         }
     }
 
     fun cargarMunicipios(estadoId: Long) {
         viewModelScope.launch {
-            _municipios.value = dao.obtenerMunicipiosPorEstadoFlow(estadoId).first()
+            dao.obtenerMunicipiosPorEstadoFlow(estadoId).collect {
+                _municipios.value = it
+            }
         }
     }
 
-    fun cargarContribuyentes() {
+    fun buscarPorRfc(rfc: String) {
         viewModelScope.launch {
-            _contribuyentes.value = dao.obtenerContribuyentesFlow().first()
+            dao.obtenerContribuyentesConUbicacionFlow(rfc).collect { lista ->
+                _contribuyentes.value = lista
+            }
         }
     }
 
@@ -71,12 +87,6 @@ internal class ContribuyenteViewModel internal constructor(
         }
     }
 
-    fun buscarPorRfc(rfc: String) {
-        viewModelScope.launch {
-            _contribuyentes.value = dao.buscarPorRfc(rfc)
-        }
-    }
-
     fun actualizarContribuyente(
         id: Long, rfc: String, nombre: String, razonSocial: String?, tipoPersona: String,
         codigoPostal: String, colonia: String, calle: String,
@@ -95,6 +105,8 @@ internal class ContribuyenteViewModel internal constructor(
             cargarContribuyentes()
         }
     }
+
+
 
     fun cargarCatalogosIniciales() {
         viewModelScope.launch {

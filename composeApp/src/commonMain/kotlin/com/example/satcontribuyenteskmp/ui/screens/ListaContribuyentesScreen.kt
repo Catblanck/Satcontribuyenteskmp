@@ -13,9 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.satcontribuyenteskmp.presentation.ContribuyenteViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.satcontribuyenteskmp.database.Contribuyente
-import com.example.satcontribuyenteskmp.database.Estado
-import com.example.satcontribuyenteskmp.database.Municipio
 
 @Composable
 internal fun ListaContribuyentesScreen(
@@ -42,11 +39,7 @@ internal fun ListaContribuyentesScreen(
             value = textoBusqueda,
             onValueChange = {
                 textoBusqueda = it
-                if (it.isBlank()) {
-                    viewModel.cargarContribuyentes()
-                } else {
-                    viewModel.buscarPorRfc(it)
-                }
+                viewModel.cargarContribuyentes(it)
             },
             label = { Text("Buscar por RFC") },
             modifier = Modifier.fillMaxWidth()
@@ -64,6 +57,8 @@ internal fun ListaContribuyentesScreen(
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text("RFC: ${contribuyente.rfc}")
                         Text("Nombre: ${contribuyente.nombre}")
+                        Text("Estado: ${contribuyente.estado_nombre}")
+                        Text("Municipio: ${contribuyente.municipio_nombre}")
                         Text("Razón social: ${contribuyente.razon_social ?: ""}")
                         Text("Actividad: ${contribuyente.actividad_economica ?: ""}")
                         Text("Régimen: ${contribuyente.regimen_fiscal ?: ""}")

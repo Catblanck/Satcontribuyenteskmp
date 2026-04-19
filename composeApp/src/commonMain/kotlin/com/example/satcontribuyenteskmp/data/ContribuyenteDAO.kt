@@ -68,8 +68,10 @@ internal class ContribuyenteDAO(
         queries.deleteContribuyente(id)
     }
 
-    fun buscarPorRfc(rfc: String) =
-        queries.buscarPorRfc(rfc).executeAsList()
+    fun obtenerContribuyentesConUbicacionFlow(rfc: String) =
+        queries.getContribuyentesConUbicacion(rfc)
+            .asFlow()
+            .mapToList(Dispatchers.IO)
 
     fun buscarPorId(id: Long) =
         queries.buscarPorId(id).executeAsOneOrNull()
@@ -107,4 +109,10 @@ internal class ContribuyenteDAO(
             id
         )
     }
+//    fun obtenerContribuyentesConUbicacionFlow() =
+//        queries.getContribuyentesConUbicacion()
+//            .asFlow()
+//            .mapToList(Dispatchers.IO)
 }
+
+

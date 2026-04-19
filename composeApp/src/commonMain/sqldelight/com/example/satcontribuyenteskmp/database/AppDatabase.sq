@@ -71,10 +71,6 @@ deleteContribuyente:
 DELETE FROM Contribuyente
 WHERE id = ?;
 
-buscarPorRfc:
-SELECT * FROM Contribuyente
-WHERE rfc LIKE '%' || ? || '%';
-
 buscarPorId:
 SELECT * FROM Contribuyente
 WHERE id = ?;
@@ -97,5 +93,26 @@ SET
     estado_id = ?,
     municipio_id = ?
 WHERE id = ?;
+
+getContribuyentesConUbicacion:
+SELECT
+    c.id,
+    c.rfc,
+    c.nombre,
+    c.razon_social,
+    c.tipo_persona,
+    c.codigo_postal,
+    c.colonia,
+    c.calle,
+    c.numero_exterior,
+    c.numero_interior,
+    c.actividad_economica,
+    c.regimen_fiscal,
+    e.nombre AS estado_nombre,
+    m.nombre AS municipio_nombre
+FROM Contribuyente c
+INNER JOIN Estado e ON c.estado_id = e.id
+INNER JOIN Municipio m ON c.municipio_id = m.id
+WHERE c.rfc LIKE '%' || ? || '%';
 
 

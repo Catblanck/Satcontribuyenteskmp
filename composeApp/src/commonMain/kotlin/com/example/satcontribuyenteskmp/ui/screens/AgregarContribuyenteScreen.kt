@@ -22,6 +22,9 @@ internal fun AgregarContribuyenteScreen(
 
     var estadoExpandido by remember { mutableStateOf(false) }
     var municipioExpandido by remember { mutableStateOf(false) }
+    var tipoExpandido by remember { mutableStateOf(false) }
+    var actividadExpandida by remember { mutableStateOf(false) }
+    var regimenExpandido by remember { mutableStateOf(false) }
 
     var estadoSeleccionado by remember { mutableStateOf<Long?>(null) }
     var municipioSeleccionado by remember { mutableStateOf<Long?>(null) }
@@ -38,9 +41,26 @@ internal fun AgregarContribuyenteScreen(
     val estados by viewModel.estados.collectAsStateWithLifecycle()
     val municipios by viewModel.municipios.collectAsStateWithLifecycle()
 
-    LaunchedEffect(id) {
-        viewModel.cargarCatalogosIniciales()
+    val actividades = listOf(
+        "Comercio al por menor",
+        "Servicios profesionales",
+        "Industria manufacturera",
+        "Construcción",
+        "Transporte",
+        "Agricultura"
+    )
 
+    val regimenes = listOf(
+        "Régimen Simplificado " +
+                "de Confianza (RESICO)",
+        "Sueldos y salarios",
+        "Actividades empresariales",
+        "Arrendamiento",
+        "Régimen de Incorporación Fiscal",
+        "Régimen General de Ley"
+    )
+
+    LaunchedEffect(id) {
         if (id != null) {
             val contribuyente = viewModel.buscarPorIdDirecto(id)
             
@@ -69,9 +89,7 @@ internal fun AgregarContribuyenteScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -82,8 +100,18 @@ internal fun AgregarContribuyenteScreen(
             OutlinedTextField(rfc, { rfc = it }, label = { Text("RFC") }, modifier = modifier)
             OutlinedTextField(nombre, { nombre = it }, label = { Text("Nombre") }, modifier = modifier)
             OutlinedTextField(razonSocial, { razonSocial = it }, label = { Text("Razón social") }, modifier = modifier)
+
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp) // Espacio entre campos
+        ){
+            val modifier = Modifier.weight(1f)
+
             OutlinedTextField(codigoPostal, { codigoPostal = it }, label = { Text("C.P.") }, modifier = modifier)
             OutlinedTextField(colonia, { colonia = it }, label = { Text("Colonia") }, modifier = modifier)
+            OutlinedTextField(calle, { calle = it }, label = { Text("Calle") }, modifier = modifier)
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -91,84 +119,184 @@ internal fun AgregarContribuyenteScreen(
         ) {
             val modifier = Modifier.weight(1f)
 
-            OutlinedTextField(calle, { calle = it }, label = { Text("Calle") }, modifier = modifier)
             OutlinedTextField(numeroExterior, { numeroExterior = it }, label = { Text("Núm. Exterior") }, modifier = modifier)
             OutlinedTextField(numeroInterior, { numeroInterior = it }, label = { Text("Núm. Interior") }, modifier = modifier)
-            OutlinedTextField(actividadEconomica, { actividadEconomica = it }, label = { Text("Act. Economica") }, modifier = modifier)
-            OutlinedTextField(regimenFiscal, { regimenFiscal = it }, label = { Text("Régimen") }, modifier = modifier)
-        }
+            Column(modifier = Modifier.padding(16.dp)){
+                Text("Estado")
 
-        Spacer(modifier = Modifier.height(8.dp))
+                Box {
+                    Button(onClick = { estadoExpandido = true }) {
+                        Text(
+                            estados
+                                .find { it.id == estadoSeleccionado }
+                                ?.nombre ?: "Seleccionar estado"
+                        )
+                    }
 
-        Text("Estado")
-
-        Box {
-            Button(onClick = { estadoExpandido = true }) {
-                Text(
-                    estados
-                        .find { it.id == estadoSeleccionado }
-                        ?.nombre ?: "Seleccionar estado"
-                )
+                    DropdownMenu(
+                        expanded = estadoExpandido,
+                        onDismissRequest = { estadoExpandido = false }
+                    ) {
+                        estados.forEach { estado ->
+                            DropdownMenuItem(
+                                text = { Text(estado.nombre) },
+                                onClick = {
+                                    estadoSeleccionado = estado.id
+                                    municipioSeleccionado = null
+                                    estadoExpandido = false
+                                    viewModel.cargarMunicipios(estado.id)
+                                }
+                            )
+                        }
+                    }
+                }
             }
 
-            DropdownMenu(
-                expanded = estadoExpandido,
-                onDismissRequest = { estadoExpandido = false }
-            ) {
-                estados.forEach { estado ->
-                    DropdownMenuItem(
-                        text = { Text(estado.nombre) },
-                        onClick = {
-                            estadoSeleccionado = estado.id
-                            municipioSeleccionado = null
-                            estadoExpandido = false
-                            viewModel.cargarMunicipios(estado.id)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Column(modifier = Modifier.padding(16.dp)){
+                Text("Municipio")
+
+                Box {
+                    Button(onClick = { municipioExpandido = true },
+                        enabled = estadoSeleccionado != null) {
+                        Text(
+                            municipios
+                                .find { it.id == municipioSeleccionado }
+                                ?.nombre ?: "Seleccionar municipio"
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = municipioExpandido,
+                        onDismissRequest = { municipioExpandido = false }
+                    ) {
+                        municipios.forEach { municipio ->
+                            DropdownMenuItem(
+                                text = { Text(municipio.nombre) },
+                                onClick = {
+                                    municipioSeleccionado = municipio.id
+                                    municipioExpandido = false
+                                }
+                            )
                         }
-                    )
+                    }
+                }
+            }
+
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+        ) {
+            Column(modifier = Modifier.padding(16.dp)){
+                Text("Tipo de Persona")
+                Box {
+                    Button(onClick = { tipoExpandido = true }) {
+                        Text(tipoPersona)
+                    }
+
+                    DropdownMenu(
+                        expanded = tipoExpandido,
+                        onDismissRequest = { tipoExpandido = false }
+                    ) {
+                        listOf("Física", "Moral").forEach {
+                            DropdownMenuItem(
+                                text = { Text(it) },
+                                onClick = {
+                                    tipoPersona = it
+                                    tipoExpandido = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Actividad Económica")
+                Box {
+                    Button(onClick = { actividadExpandida = true }) {
+                        Text(if (actividadEconomica.isBlank()) "Seleccionar" else actividadEconomica)
+                    }
+
+                    DropdownMenu(
+                        expanded = actividadExpandida,
+                        onDismissRequest = { actividadExpandida = false }
+                    ) {
+                        actividades.forEach {
+                            DropdownMenuItem(
+                                text = { Text(it) },
+                                onClick = {
+                                    actividadEconomica = it
+                                    actividadExpandida = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Régimen Fiscal")
+
+                Box {
+                    Button(onClick = { regimenExpandido = true }) {
+                        Text(if (regimenFiscal.isBlank()) "Seleccionar" else regimenFiscal)
+                    }
+
+                    DropdownMenu(
+                        expanded = regimenExpandido,
+                        onDismissRequest = { regimenExpandido = false }
+                    ) {
+                        regimenes.forEach {
+                            DropdownMenuItem(
+                                text = { Text(it) },
+                                onClick = {
+                                    regimenFiscal = it
+                                    regimenExpandido = false
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Municipio")
-
-        Box {
-            Button(onClick = { municipioExpandido = true }) {
-                Text(
-                    municipios
-                        .find { it.id == municipioSeleccionado }
-                        ?.nombre ?: "Seleccionar municipio"
-                )
-            }
-
-            DropdownMenu(
-                expanded = municipioExpandido,
-                onDismissRequest = { municipioExpandido = false }
-            ) {
-                municipios.forEach { municipio ->
-                    DropdownMenuItem(
-                        text = { Text(municipio.nombre) },
-                        onClick = {
-                            municipioSeleccionado = municipio.id
-                            municipioExpandido = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(onClick = {
 
-            if (rfc.isBlank() || nombre.isBlank()) {
-                error = "RFC y Nombre son obligatorios"
+            if (rfc.isBlank() ||codigoPostal.isBlank() || colonia.isBlank() ||
+                calle.isBlank() || numeroExterior.isBlank()
+            ) {
+                error = "Campos de domicilio y RFC son obligatorios"
+                return@Button
+            }
+            if (tipoPersona == "Física" && nombre.isBlank()) {
+                error = "El nombre es obligatorio para persona física"
                 return@Button
             }
 
+            if (tipoPersona == "Moral" && razonSocial.isBlank()) {
+                error = "La razón social es obligatoria para persona moral"
+                return@Button
+            }
             if (estadoSeleccionado == null || municipioSeleccionado == null) {
                 error = "Selecciona estado y municipio"
+                return@Button
+            }
+
+            if (actividadEconomica.isBlank()) {
+                error = "Selecciona actividad económica"
+                return@Button
+            }
+
+            if (regimenFiscal.isBlank()) {
+                error = "Selecciona régimen fiscal"
                 return@Button
             }
 
